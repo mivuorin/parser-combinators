@@ -3,30 +3,39 @@ module ParserCombinators.Test
 open NUnit.Framework
 open FsUnit
 
-let parseChar char (stream: string) =
+type ParseResult<'a> =
+    | Success of 'a
+    | Failure of string
+
+let parseChar char (stream: string)  =
     if stream = "" then
-        ("No more input", "")
+        Failure "No more input"
     else
         let first = stream.[0]
         let rest = stream.[1..]
 
         if first = char then
-            ( $"Found '{char}'", rest)
+            Success(char, rest)
         else
-            ($"Expecting '{char}'. Got '{first}'", stream)
+            Failure $"Expecting '{char}'. Got '{first}'"
+
 
 [<Test>]
 let empty_string () =
-    "" |> parseChar 'A' |> should equal ("No more input", "")
+    let expected: ParseResult<char * string> = Failure "No more input"
+    "" |> parseChar 'A' |> should equal expected
 
 [<Test>]
 let when_char_is_found_return_message_and_rest_of_the_stream () =
-    "Arest" |> parseChar 'A' |> should equal ("Found 'A'", "rest")
+    let expected = Success(('A', "rest"))
+    "Arest" |> parseChar 'A' |> should equal expected
 
 [<Test>]
 let when_char_is_not_found_return_false_and_unmodified_stream () =
-    "rest" |> parseChar 'A' |> should equal ("Expecting 'A'. Got 'r'", "rest")
+    let expected: ParseResult<char * string> = Failure "Expecting 'A'. Got 'r'"
+    "rest" |> parseChar 'A' |> should equal expected
 
 [<Test>]
 let only_char () =
-    "A" |> parseChar 'A' |> should equal ("Found 'A'", "")
+    let expected = Success('A', "")
+    "A" |> parseChar 'A' |> should equal expected
