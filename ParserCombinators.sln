@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ParserCombinators.Test", "ParserCombinators.Test.fsproj", "{53CA2CB3-C81C-44D1-9DDC-6E4DB3C39DBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53CA2CB3-C81C-44D1-9DDC-6E4DB3C39DBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53CA2CB3-C81C-44D1-9DDC-6E4DB3C39DBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53CA2CB3-C81C-44D1-9DDC-6E4DB3C39DBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53CA2CB3-C81C-44D1-9DDC-6E4DB3C39DBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
