@@ -19,23 +19,24 @@ let parseChar char (stream: string)  =
         else
             Failure $"Expecting '{char}'. Got '{first}'"
 
+let parseA = parseChar 'A'
 
 [<Test>]
 let empty_string () =
     let expected: ParseResult<char * string> = Failure "No more input"
-    "" |> parseChar 'A' |> should equal expected
+    "" |> parseA |> should equal expected
 
 [<Test>]
 let when_char_is_found_return_message_and_rest_of_the_stream () =
     let expected = Success(('A', "rest"))
-    "Arest" |> parseChar 'A' |> should equal expected
+    "Arest" |> parseA |> should equal expected
 
 [<Test>]
 let when_char_is_not_found_return_false_and_unmodified_stream () =
     let expected: ParseResult<char * string> = Failure "Expecting 'A'. Got 'r'"
-    "rest" |> parseChar 'A' |> should equal expected
+    "rest" |> parseA |> should equal expected
 
 [<Test>]
 let only_char () =
     let expected = Success('A', "")
-    "A" |> parseChar 'A' |> should equal expected
+    "A" |> parseA |> should equal expected
