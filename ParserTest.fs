@@ -2,16 +2,8 @@ module ParserCombinators.Test
 
 open NUnit.Framework
 open FsUnit
-
-type ParseResult<'a> =
-    | Success of 'a
-    | Failure of string
-
-type Parser<'a> = Parser of (string -> ParseResult<'a * string>) 
-
-let run parser input =
-    let (Parser inner) = parser
-    inner input
+open Parser
+open ParserCombinators.Parser
 
 let parseChar char =
     let parser stream = 
@@ -28,6 +20,7 @@ let parseChar char =
     Parser parser
 
 let parseA: Parser<char> = parseChar 'A'
+let parseB: Parser<char> = parseChar 'B'
 
 [<Test>]
 let empty_string () =
@@ -36,8 +29,7 @@ let empty_string () =
 
 [<Test>]
 let when_char_is_found_return_message_and_rest_of_the_stream () =
-    let expected = Success(('A', "rest"))
-    "Arest" |> run parseA |> should equal expected
+    "Arest" |> run parseA |> should equal (Success(('A', "rest")))
 
 [<Test>]
 let when_char_is_not_found_return_false_and_unmodified_stream () =
@@ -46,5 +38,22 @@ let when_char_is_not_found_return_false_and_unmodified_stream () =
 
 [<Test>]
 let only_char () =
-    let expected = Success('A', "")
-    "A" |> run parseA |> should equal expected
+    "A" |> run parseA |> should equal (Success('A', ""))
+
+[<Test>]
+let combine_parsers_with_andThen () =
+    "ABC" |> run (andThen parseA parseB) |> should equal (Success(('A', 'B'), "C"))
+
+[<Test>]
+let andThen_when_parserA_fails () =
+    let expected:ParseResult<(char * char) * string> = Failure "Expecting 'A'. Got 'Z'"
+    "ZAB" |> run (andThen parseA parseB) |> should equal expected
+
+[<Test>]
+let andThen_when_parserB_fails () =
+    let expected:ParseResult<(char * char) * string> = Failure "Expecting 'B'. Got 'Z'"
+    "AZB" |> run (andThen parseA parseB) |> should equal expected
+
+[<Test>]
+let infix_operator () =
+    "ABC" |> run (parseA .>>. parseB) |> should equal (Success(('A', 'B'), "C"))
