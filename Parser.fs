@@ -24,3 +24,15 @@ let andThen (parserA: Parser<'a>) (parserB: Parser<'b>) : Parser<('a * 'b)> =
     Parser inner
 
 let ( .>>. ) = andThen
+
+let orElse (parserA: Parser<'a>) (parserB: Parser<'a>) : Parser<'a> =
+    let inner input =
+        let result = run parserA input
+        match result with
+        | Failure _ ->
+            run parserB input
+        | error -> error
+        
+    Parser inner
+
+let ( <|> ) = orElse

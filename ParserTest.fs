@@ -3,7 +3,6 @@ module ParserCombinators.Test
 open NUnit.Framework
 open FsUnit
 open Parser
-open ParserCombinators.Parser
 
 let parseChar char =
     let parser stream = 
@@ -21,6 +20,7 @@ let parseChar char =
 
 let parseA: Parser<char> = parseChar 'A'
 let parseB: Parser<char> = parseChar 'B'
+let parseC: Parser<char> = parseChar 'C'
 
 [<Test>]
 let empty_string () =
@@ -55,5 +55,30 @@ let andThen_when_parserB_fails () =
     "AZB" |> run (andThen parseA parseB) |> should equal expected
 
 [<Test>]
-let infix_operator () =
+let andThen_infix_operator () =
     "ABC" |> run (parseA .>>. parseB) |> should equal (Success(('A', 'B'), "C"))
+
+[<Test>]
+let orElse_when_parserA_succeeds () =
+    "AZZ" |> run (orElse parseA parseB) |> should equal (Success('A', "ZZ"))
+
+[<Test>]
+let orElse_when_parserA_fails_and_parserB_succeeds () =
+    let expected = Success('B', "ZZ")
+    "BZZ" |> run (orElse parseA parseB) |> should equal expected
+
+[<Test>]
+let orElse_when_parserA_fails_and_parserB_fails () =
+    let expected: ParseResult<char * string> = Failure ("Expecting 'B'. Got 'C'")
+    "CZZ" |> run (orElse parseA parseB) |> should equal expected
+
+[<Test>]
+let orElse_infix_operator () =
+    "AZZ" |> run (parseA <|> parseB) |> should equal (Success('A', "ZZ"))
+
+[<Test>]
+let combine_andThen_and_orElse () =
+    let bOrC = parseB <|> parseC
+    let aAndThenBorC = parseA .>>. bOrC
+    "AB" |> run aAndThenBorC |> should equal (Success(('A', 'B'), ""))
+    "AC" |> run aAndThenBorC |> should equal (Success(('A', 'C'), ""))
