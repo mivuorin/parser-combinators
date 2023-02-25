@@ -36,3 +36,6 @@ let orElse (parserA: Parser<'a>) (parserB: Parser<'a>) : Parser<'a> =
     Parser inner
 
 let ( <|> ) = orElse
+
+let choice parsers =
+    List.reduce orElse parsers

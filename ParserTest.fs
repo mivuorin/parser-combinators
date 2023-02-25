@@ -5,7 +5,7 @@ open FsUnit
 open Parser
 
 let parseChar char =
-    let parser stream = 
+    let parser stream =
         if stream = "" then
             Failure "No more input"
         else
@@ -16,11 +16,23 @@ let parseChar char =
                 Success(char, rest)
             else
                 Failure $"Expecting '{char}'. Got '{first}'"
+
     Parser parser
 
 let parseA: Parser<char> = parseChar 'A'
 let parseB: Parser<char> = parseChar 'B'
 let parseC: Parser<char> = parseChar 'C'
+
+let anyOf chars =
+    chars
+    |> List.map parseChar
+    |> choice
+
+let parseLowercase =
+    anyOf ['a'..'z']
+
+let parseDigit =
+    anyOf ['1'..'9']
 
 [<Test>]
 let empty_string () =
@@ -46,12 +58,12 @@ let combine_parsers_with_andThen () =
 
 [<Test>]
 let andThen_when_parserA_fails () =
-    let expected:ParseResult<(char * char) * string> = Failure "Expecting 'A'. Got 'Z'"
+    let expected: ParseResult<(char * char) * string> = Failure "Expecting 'A'. Got 'Z'"
     "ZAB" |> run (andThen parseA parseB) |> should equal expected
 
 [<Test>]
 let andThen_when_parserB_fails () =
-    let expected:ParseResult<(char * char) * string> = Failure "Expecting 'B'. Got 'Z'"
+    let expected: ParseResult<(char * char) * string> = Failure "Expecting 'B'. Got 'Z'"
     "AZB" |> run (andThen parseA parseB) |> should equal expected
 
 [<Test>]
@@ -69,7 +81,7 @@ let orElse_when_parserA_fails_and_parserB_succeeds () =
 
 [<Test>]
 let orElse_when_parserA_fails_and_parserB_fails () =
-    let expected: ParseResult<char * string> = Failure ("Expecting 'B'. Got 'C'")
+    let expected: ParseResult<char * string> = Failure("Expecting 'B'. Got 'C'")
     "CZZ" |> run (orElse parseA parseB) |> should equal expected
 
 [<Test>]
@@ -82,3 +94,18 @@ let combine_andThen_and_orElse () =
     let aAndThenBorC = parseA .>>. bOrC
     "AB" |> run aAndThenBorC |> should equal (Success(('A', 'B'), ""))
     "AC" |> run aAndThenBorC |> should equal (Success(('A', 'C'), ""))
+
+[<Test>]
+let choice_executes_parsers_until_one_fails_or_passes () =
+    let parseAorBorC = choice [ parseA; parseB; parseC ]
+    "A" |> run parseAorBorC |> should equal (Success('A', ""))
+    "B" |> run parseAorBorC |> should equal (Success('B', ""))
+    "C" |> run parseAorBorC |> should equal (Success('C', ""))
+
+[<Test>]
+let parseLowercase_implemented_with_anyOf_and_choice () =
+    "aBC" |> run parseLowercase |> should equal (Success('a', "BC"))
+
+[<Test>]
+let parseDigit_implemented_with_anyOf_and_choice () =
+    "1BC" |> run parseDigit |> should equal (Success('1', "BC"))
