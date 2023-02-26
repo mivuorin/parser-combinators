@@ -52,4 +52,16 @@ let rec map (func: 'a -> 'b) (parser: Parser<'a>) : Parser<'b> =
 
 let ( <!> ) = map
 
-let ( |>> ) value func = map func value 
+let ( |>> ) value func = map func value
+
+let returnParser (value:'a)  : Parser<'a> =
+    Parser (fun input -> Success(value, input))
+
+let apply (func:Parser<('a -> 'b)>) (value:Parser<'a>) : Parser<'b> =
+    let paired = (func .>>. value)
+    paired |> map (fun (func, value) -> func value)
+
+let ( <*> ) = apply
+
+let lif2 f a b =
+    returnParser f <*> a <*> b

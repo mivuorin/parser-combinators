@@ -12,6 +12,7 @@
         <Compile Include="CharacterParser.fs" />
         <Compile Include="ParserTest.fs" />
         <Compile Include="MapTest.fs" />
+        <Compile Include="ApplyTest.fs" />
         <Compile Include="Program.fs" />
         <Content Include="README.md" />
     </ItemGroup>
