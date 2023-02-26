@@ -9,7 +9,9 @@
 
     <ItemGroup>
         <Compile Include="Parser.fs" />
+        <Compile Include="CharacterParser.fs" />
         <Compile Include="ParserTest.fs" />
+        <Compile Include="MapTest.fs" />
         <Compile Include="Program.fs" />
         <Content Include="README.md" />
     </ItemGroup>

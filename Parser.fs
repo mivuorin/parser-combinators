@@ -39,3 +39,17 @@ let ( <|> ) = orElse
 
 let choice parsers =
     List.reduce orElse parsers
+
+let rec map (func: 'a -> 'b) (parser: Parser<'a>) : Parser<'b> =
+    let inner input =
+        let result = run parser input
+        match result with
+        | Success(value, rest) ->
+            let mapped = func value
+            Success (mapped, rest)
+        | Failure error -> Failure error
+    Parser inner
+
+let ( <!> ) = map
+
+let ( |>> ) value func = map func value 

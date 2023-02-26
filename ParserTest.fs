@@ -1,38 +1,9 @@
-module ParserCombinators.Test
+module ParserCombinators.Test.ParserTest
 
 open NUnit.Framework
 open FsUnit
-open Parser
-
-let parseChar char =
-    let parser stream =
-        if stream = "" then
-            Failure "No more input"
-        else
-            let first = stream.[0]
-            let rest = stream.[1..]
-
-            if first = char then
-                Success(char, rest)
-            else
-                Failure $"Expecting '{char}'. Got '{first}'"
-
-    Parser parser
-
-let parseA: Parser<char> = parseChar 'A'
-let parseB: Parser<char> = parseChar 'B'
-let parseC: Parser<char> = parseChar 'C'
-
-let anyOf chars =
-    chars
-    |> List.map parseChar
-    |> choice
-
-let parseLowercase =
-    anyOf ['a'..'z']
-
-let parseDigit =
-    anyOf ['1'..'9']
+open ParserCombinators.Parser
+open ParserCombinators.CharacterParser
 
 [<Test>]
 let empty_string () =
