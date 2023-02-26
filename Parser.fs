@@ -65,3 +65,10 @@ let ( <*> ) = apply
 
 let lif2 f a b =
     returnParser f <*> a <*> b
+
+let rec sequence (parsers:Parser<'a> list) : Parser<'a list> =
+    let cons = lif2 (fun head rest -> head :: rest)
+    match parsers with
+    | [] -> returnParser []
+    | head :: rest ->
+        cons head (sequence rest)
