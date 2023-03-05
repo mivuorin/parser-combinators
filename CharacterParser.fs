@@ -1,9 +1,13 @@
 ﻿module ParserCombinators.CharacterParser
 
+open System
 open ParserCombinators.Parser
 
-let error expected actual =
+let failureNotExpected expected actual =
     Failure $"Expecting '{expected}'. Got '{actual}'"
+
+let failureNoMoreInput  =
+    Failure "No more input"
 
 let parseChar char =
     let parser stream =
@@ -16,7 +20,7 @@ let parseChar char =
             if first = char then
                 Success(char, rest)
             else
-                error char first
+                failureNotExpected char first
 
     Parser parser
 
@@ -29,3 +33,10 @@ let anyOf chars = chars |> List.map parseChar |> choice
 let parseLowercase = anyOf [ 'a' .. 'z' ]
 
 let parseDigit = anyOf [ '1' .. '9' ]
+
+let parseString (string: string) : Parser<string> =
+    string
+    |> List.ofSeq
+    |> List.map parseChar
+    |> sequence
+    |> map (fun chars -> chars |> List.toArray |> String)

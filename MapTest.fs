@@ -19,7 +19,7 @@ let map_when_parser_succeeds () =
 [<Test>]
 let map_when_parser_fails () =
     let parser = map Char.ToLower parseA
-    let expected: ParseResult<char * string> = error 'A' 'B'
+    let expected: ParseResult<char * string> = failureNotExpected 'A' 'B'
     "B" |> run parser |> should equal expected
 
 [<Test>]
