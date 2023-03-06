@@ -16,6 +16,7 @@
         <Compile Include="SequnceTest.fs" />
         <Compile Include="ZeroOrMoreTest.fs" />
         <Compile Include="OneOrMoreTest.fs" />
+        <Compile Include="OptionalTest.fs" />
         <Compile Include="IntegerParserTest.fs" />
         <Compile Include="Program.fs" />
         <Content Include="README.md" />

@@ -1,18 +1,10 @@
 ﻿module ParserCombinators.Test.IntegerParserTest
 
-open System
 open Microsoft.FSharp.Core
 open NUnit.Framework
 open FsUnit
 open ParserCombinators.Parser
 open ParserCombinators.CharacterParser
-
-let parseInt: Parser<int> =
-    let digit = anyOf ['0'..'9']
-    let oneOrMoreDigits = oneOrMore digit
-
-    oneOrMoreDigits
-    |> map (fun chars -> chars |> List.toArray |> String |> int)
 
 [<Test>]
 let single_digit () =
@@ -28,5 +20,8 @@ let multiple_digits () =
 let failure_message_is_not_best_one () =
     let expected: ParseResult<int * string> = failureNotExpected '9' 'A'
     "A" |> run parseInt |>  should equal expected
-    
-    
+
+[<Test>]
+let optional_minus_sign () =
+    let expected: ParseResult<int * string> = Success(-23, "A")
+    "-23A" |> run parseInt |>  should equal expected

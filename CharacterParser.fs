@@ -6,8 +6,7 @@ open ParserCombinators.Parser
 let failureNotExpected expected actual =
     Failure $"Expecting '{expected}'. Got '{actual}'"
 
-let failureNoMoreInput  =
-    Failure "No more input"
+let failureNoMoreInput = Failure "No more input"
 
 let parseChar char =
     let parser stream =
@@ -40,3 +39,16 @@ let parseString (string: string) : Parser<string> =
     |> List.map parseChar
     |> sequence
     |> map (fun chars -> chars |> List.toArray |> String)
+
+let parseInt: Parser<int> =
+    let digit = anyOf [ '0' .. '9' ]
+    let oneOrMoreDigits = oneOrMore digit
+    let optionalSign = parseChar '-' |> optional
+
+    let charsToInt (sign, chars) =
+        let value = chars |> List.toArray |> String |> int
+        match sign with
+        | None -> value
+        | Some _ -> -value
+
+    optionalSign .>>. oneOrMoreDigits |>> charsToInt

@@ -99,3 +99,8 @@ let oneOrMore (parser: Parser<'a>) : Parser<'a list> =
             Success(value :: values, rest)
 
     Parser inner
+
+let optional (parser: Parser<'a>) : Parser<Option<'a>> =
+    let some = parser |> map Some
+    let none = returnParser None
+    some <|> none
