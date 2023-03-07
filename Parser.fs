@@ -104,3 +104,15 @@ let optional (parser: Parser<'a>) : Parser<Option<'a>> =
     let some = parser |> map Some
     let none = returnParser None
     some <|> none
+
+let leftOnly left right =
+    left .>>. right |>> fst
+
+let rightOnly left right =
+    left .>>. right |>> snd
+
+let (.>>) = leftOnly
+let (>>.) = rightOnly
+
+let between left middle right =
+    left >>. middle .>> right

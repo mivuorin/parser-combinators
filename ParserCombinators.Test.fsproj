@@ -18,6 +18,7 @@
         <Compile Include="OneOrMoreTest.fs" />
         <Compile Include="OptionalTest.fs" />
         <Compile Include="IntegerParserTest.fs" />
+        <Compile Include="IgnoreResultsTest.fs" />
         <Compile Include="Program.fs" />
         <Content Include="README.md" />
     </ItemGroup>
