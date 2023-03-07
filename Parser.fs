@@ -116,3 +116,6 @@ let (>>.) = rightOnly
 
 let between left middle right =
     left >>. middle .>> right
+
+let separatedBy parser separator =
+    parser .>>. zeroOrMore (separator >>. parser) |>> List.Cons
