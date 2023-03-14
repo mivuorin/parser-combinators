@@ -29,7 +29,7 @@ let returnParser (value: 'a) : Parser<'a> =
 
 let andThen (parserA: Parser<'a>) (parserB: Parser<'b>) : Parser<('a * 'b)> =
     parserA
-    |> bind (fun resultA -> parserB |> bind (fun resultB -> returnParser (resultA, resultB)))
+    >>= (fun resultA -> parserB >>= (fun resultB -> (resultA, resultB) |> returnParser))
 
 let (.>>.) = andThen
 
@@ -47,16 +47,14 @@ let (<|>) = orElse
 
 let choice parsers = List.reduce orElse parsers
 
-let rec map (func: 'a -> 'b) (parser: Parser<'a>) : Parser<'b> =
-    let lifted: 'a -> Parser<'b> = func >> returnParser
-    bind lifted parser
+let rec map (func: 'a -> 'b) (parser: Parser<'a>) : Parser<'b> = parser >>= (func >> returnParser)
 
 let (<!>) = map
 
 let (|>>) value func = map func value
 
 let apply (pFunc: Parser<('a -> 'b)>) (pValue: Parser<'a>) : Parser<'b> =
-    pFunc |> bind (fun f -> pValue |> bind (fun value -> f value |> returnParser))
+    pFunc >>= (fun f -> pValue >>= (fun value -> f value |> returnParser))
 
 let (<*>) = apply
 
@@ -84,7 +82,7 @@ let zeroOrMore parser : Parser<'a list> =
 
 let oneOrMore (parser: Parser<'a>) : Parser<'a list> =
     parser
-    |> bind (fun head -> zeroOrMore parser |> bind (fun rest -> head :: rest |> returnParser))
+    >>= (fun head -> zeroOrMore parser >>= (fun rest -> head :: rest |> returnParser))
 
 let optional (parser: Parser<'a>) : Parser<Option<'a>> =
     let some = parser |> map Some
