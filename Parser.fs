@@ -10,20 +10,26 @@ let run parser input =
     let (Parser inner) = parser
     inner input
 
-let andThen (parserA: Parser<'a>) (parserB: Parser<'b>) : Parser<('a * 'b)> =
+let bind (f: 'a -> Parser<'b>) (p: Parser<'a>) : Parser<'b> =
     let inner input =
-        let result = run parserA input
+        let result = run p input
 
         match result with
         | Failure error -> Failure error
-        | Success (valueA, rest) ->
-            let resultB = run parserB rest
-
-            match resultB with
-            | Failure error -> Failure error
-            | Success (valueB, rest) -> Success(((valueA, valueB), rest))
+        | Success (value, rest) ->
+            let parser = f value
+            run parser rest
 
     Parser inner
+
+let (>>=) p f = bind f p
+
+let returnParser (value: 'a) : Parser<'a> =
+    Parser(fun input -> Success(value, input))
+
+let andThen (parserA: Parser<'a>) (parserB: Parser<'b>) : Parser<('a * 'b)> =
+    parserA
+    |> bind (fun resultA -> parserB |> bind (fun resultB -> returnParser (resultA, resultB)))
 
 let (.>>.) = andThen
 
@@ -42,27 +48,15 @@ let (<|>) = orElse
 let choice parsers = List.reduce orElse parsers
 
 let rec map (func: 'a -> 'b) (parser: Parser<'a>) : Parser<'b> =
-    let inner input =
-        let result = run parser input
-
-        match result with
-        | Success (value, rest) ->
-            let mapped = func value
-            Success(mapped, rest)
-        | Failure error -> Failure error
-
-    Parser inner
+    let lifted: 'a -> Parser<'b> = func >> returnParser
+    bind lifted parser
 
 let (<!>) = map
 
 let (|>>) value func = map func value
 
-let returnParser (value: 'a) : Parser<'a> =
-    Parser(fun input -> Success(value, input))
-
-let apply (func: Parser<('a -> 'b)>) (value: Parser<'a>) : Parser<'b> =
-    let paired = (func .>>. value)
-    paired |> map (fun (func, value) -> func value)
+let apply (pFunc: Parser<('a -> 'b)>) (pValue: Parser<'a>) : Parser<'b> =
+    pFunc |> bind (fun f -> pValue |> bind (fun value -> f value |> returnParser))
 
 let (<*>) = apply
 
@@ -89,33 +83,22 @@ let zeroOrMore parser : Parser<'a list> =
     Parser inner
 
 let oneOrMore (parser: Parser<'a>) : Parser<'a list> =
-    let inner (input: string) =
-        let first = run parser input
-
-        match first with
-        | Failure error -> Failure error
-        | Success (value, rest) ->
-            let values, rest = recurZeroOrMore parser rest
-            Success(value :: values, rest)
-
-    Parser inner
+    parser
+    |> bind (fun head -> zeroOrMore parser |> bind (fun rest -> head :: rest |> returnParser))
 
 let optional (parser: Parser<'a>) : Parser<Option<'a>> =
     let some = parser |> map Some
     let none = returnParser None
     some <|> none
 
-let leftOnly left right =
-    left .>>. right |>> fst
+let leftOnly left right = left .>>. right |>> fst
 
-let rightOnly left right =
-    left .>>. right |>> snd
+let rightOnly left right = left .>>. right |>> snd
 
 let (.>>) = leftOnly
 let (>>.) = rightOnly
 
-let between left middle right =
-    left >>. middle .>> right
+let between left middle right = left >>. middle .>> right
 
 let separatedBy parser separator =
     parser .>>. zeroOrMore (separator >>. parser) |>> List.Cons
